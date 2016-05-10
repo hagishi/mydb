@@ -1,0 +1,4 @@
+- fqdn: MY MAC
+  user: root
+  host: localhost
+  pass: password

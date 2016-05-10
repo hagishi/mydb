@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+# require python >= 3.3
+
+import os
+# require pip install pyyaml
+import yaml
+
+print(__file__, 333)
+filename = 'mydb.yaml'
+config = os.path.abspath(os.path.dirname(__file__)) + '/' + filename
+
+f = open(config)
+PORT = 40000
+
+db = yaml.load(f)
+
+print('select your database number>')
+for idx, row in enumerate(db):
+    print('(%s): %s' % (idx, row['fqdn']))
+print('>>', end='')
+
+num = input().strip()
+
+con = db[int(num)]
+remote = con.get('remote')
+port = con.get('port', 3306)
+
+
+if remote and not remote == 'localhost':
+    kill = 'kill `lsof -i tcp:%s` > /dev/null 2>&1' % PORT
+    ssh = 'ssh -f -N -C -L %S:127.0.0.1:3306 %s' % (PORT, con['host'])
+    os.system(kill)
+    os.system(ssh)
+
+if con['pass']:
+    passwd = '-p %s ' % con['pass']
+
+command = 'mycli -u %s -P %s -h %s %s' % (con['user'], 3306, con['host'], passwd)
+
+print(command)
+os.system(command)
